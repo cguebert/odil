@@ -9,7 +9,7 @@ find_package(PkgConfig)
 pkg_check_modules(PC_JsonCpp QUIET jsoncpp)
 set(JsonCpp_DEFINITIONS ${PC_JsonCpp_CFLAGS_OTHER})
 
-find_path(JsonCpp_INCLUDE_DIR "json/json.h" HINTS ${PC_JsonCpp_INCLUDE_DIRS})
+find_path(JsonCpp_INCLUDE_DIR "json/json.h" PATH_SUFFIXES jsoncpp HINTS ${PC_JsonCpp_INCLUDE_DIRS})
 find_library(JsonCpp_LIBRARY NAMES jsoncpp HINTS ${PC_JsonCpp_LIBRARY_DIRS} )
 
 set(JsonCpp_LIBRARIES ${JsonCpp_LIBRARY} )
