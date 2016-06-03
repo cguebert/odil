@@ -9,8 +9,8 @@ set(odil_VERSION
 
 option(BUILD_EXAMPLES "Build the examples directory." ON)
 option(BUILD_WRAPPERS "Build the Python Wrappers." ON)
-
 option(BUILD_SHARED_LIBS "Build Odil with shared libraries." ON)
+option(BUILD_INSTALL "Generate the install target." ON)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}" ${CMAKE_MODULE_PATH})
 include(CTest)
@@ -23,6 +23,14 @@ if(WIN32)
     if(${BUILD_SHARED_LIBS})
         set(WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
     endif()
+    
+    # Multiprocessor build on Visual C++
+    if(MSVC)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+    endif()
+
+    # We want to put the debug targets in the same directory, so we have to set a postfix
+    set(CMAKE_DBUG_POSTFIX "_d")
 
     # We have to set _WIN32_WINNT for Asio
     if(${CMAKE_SYSTEM_VERSION} EQUAL 10) # Windows 10

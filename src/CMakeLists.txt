@@ -1,8 +1,8 @@
 find_package(Boost REQUIRED COMPONENTS filesystem system)
 find_package(DCMTK REQUIRED)
 find_package(ICU REQUIRED)
-find_package(JsonCpp REQUIRED)
-find_package(Log4Cpp REQUIRED)
+find_package(jsoncpp REQUIRED)
+find_package(log4cpp REQUIRED)
 
 file(GLOB_RECURSE Header_Files "*.h")
 file(GLOB_RECURSE Source_Files "*.cpp")
@@ -13,36 +13,74 @@ GroupFiles(Header_Files)
 GroupFiles(Source_Files)
 
 include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR} ${Boost_INCLUDE_DIRS} ${DCMTK_INCLUDE_DIRS}
-${ICU_INCLUDE_DIRS} ${Log4Cpp_INCLUDE_DIRS} ${JsonCpp_INCLUDE_DIRS})
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${Boost_INCLUDE_DIRS}
+    ${DCMTK_INCLUDE_DIRS}
+    ${ICU_INCLUDE_DIRS})
 add_definitions(
     ${DCMTK_DEFINITIONS}
     -D BOOST_ASIO_SEPARATE_COMPILATION
     -D ODIL_MAJOR_VERSION=${odil_MAJOR_VERSION}
 )
-link_directories(${Boost_LIBRARY_DIRS} ${DCMTK_LIBRARY_DIRS})
+link_directories(${Boost_LIBRARY_DIRS})
 
 add_library(libodil ${Source_Files} ${Header_Files} ${templates})
 set_target_properties(libodil PROPERTIES OUTPUT_NAME odil)
 
-target_link_libraries(libodil
-    ${Boost_LIBRARIES} ${DCMTK_LIBRARIES} ${ICU_LIBRARIES} ${JsonCpp_LIBRARIES}
-    ${Log4Cpp_LIBRARIES})
+target_link_libraries(libodil PRIVATE
+    ${Boost_LIBRARIES}
+    ${ICU_LIBRARIES}
+    dcmdata ofstd oflog
+    jsoncpp_lib_static
+    log4cpp)
 
 if(WIN32)
-    add_definitions(-DBUILDING_ODIL)
-    target_link_libraries(libodil netapi32)
+    add_definitions(-D BUILDING_ODIL 
+                    -D BOOST_ALL_NO_LIB)
+    target_link_libraries(libodil PRIVATE netapi32)
 endif()
 
 set_target_properties(libodil PROPERTIES
     VERSION ${odil_VERSION}
     SOVERSION ${odil_MAJOR_VERSION})
 
-install(
-    DIRECTORY odil/ DESTINATION include/odil
-    FILES_MATCHING PATTERN "*.h" PATTERN "*.txx")
-install(
-    TARGETS libodil
-    ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib
-    RUNTIME DESTINATION bin)
+target_include_directories(libodil INTERFACE
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+  $<INSTALL_INTERFACE:include>)
+
+if (BUILD_INSTALL)
+    set(odil_cmake_dir lib/cmake/odil)
+    set(version_config ${PROJECT_BINARY_DIR}/odil-config-version.cmake)
+    set(project_config ${PROJECT_BINARY_DIR}/odil-config.cmake)
+    set(targets_export_name odil-targets)
+
+    install(
+        DIRECTORY odil/ DESTINATION include/odil
+        FILES_MATCHING PATTERN "*.h" PATTERN "*.txx")
+    install(
+        TARGETS libodil
+        EXPORT ${targets_export_name}
+        ARCHIVE DESTINATION lib
+        LIBRARY DESTINATION lib
+        RUNTIME DESTINATION bin)
+    
+    # Generate the version, config and target files into the build directory.
+    include(CMakePackageConfigHelpers)
+    write_basic_package_version_file(
+        ${version_config}
+        VERSION ${odil_VERSION}
+        COMPATIBILITY AnyNewerVersion)
+    configure_package_config_file(
+        ${PROJECT_SOURCE_DIR}/cmake/odil-config.cmake.in 
+        ${project_config}
+        INSTALL_DESTINATION ${odil_cmake_dir})
+    export(
+        TARGETS libodil 
+        FILE "${PROJECT_BINARY_DIR}/${targets_export_name}.cmake")
+
+    # Install version, config and target files.
+    install(
+        FILES ${project_config} ${version_config}
+        DESTINATION ${odil_cmake_dir})
+    install(EXPORT ${targets_export_name} DESTINATION ${odil_cmake_dir})
+endif ()
