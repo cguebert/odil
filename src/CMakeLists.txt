@@ -8,6 +8,8 @@ file(GLOB_RECURSE Header_Files "*.h")
 file(GLOB_RECURSE Source_Files "*.cpp")
 file(GLOB_RECURSE templates "*.txx")
 
+list(APPEND Header_Files ${templates})
+
 # Regroup files by folder
 GroupFiles(Header_Files)
 GroupFiles(Source_Files)
@@ -24,7 +26,7 @@ add_definitions(
 )
 link_directories(${Boost_LIBRARY_DIRS})
 
-add_library(libodil ${Source_Files} ${Header_Files} ${templates})
+add_library(libodil ${Source_Files} ${Header_Files})
 set_target_properties(libodil PROPERTIES OUTPUT_NAME odil)
 
 target_link_libraries(libodil PRIVATE

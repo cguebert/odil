@@ -9,6 +9,7 @@
 #ifndef _203e7be8_beaa_4d97_94b2_6a0070f158a1
 #define _203e7be8_beaa_4d97_94b2_6a0070f158a1
 
+#include "odil.h"
 #include <string>
 
 namespace odil
@@ -18,10 +19,10 @@ namespace base64
 {
 
 /// @brief Dictionary of symbols for Base64.
-extern std::string const symbols;
+extern ODIL_API std::string const symbols;
 
 /// @brief Mapping of ASCII characters to values of Base64 symbols.
-extern std::string const reversed_symbols;
+extern ODIL_API std::string const reversed_symbols;
 
 /// @brief Encode a sequence of 8 bits data to Base64.
 template<typename TInputIterator, typename TOutputIterator>
