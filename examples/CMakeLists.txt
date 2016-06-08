@@ -1,10 +1,8 @@
 find_package(Boost REQUIRED)
 find_package(DCMTK REQUIRED)
-find_package(JsonCpp REQUIRED)
+find_package(jsoncpp REQUIRED)
 
-include_directories(
-    ${CMAKE_SOURCE_DIR}/src ${Boost_INCLUDE_DIRS} ${DCMTK_INCLUDE_DIRS}
-    ${JsonCpp_INCLUDE_DIRS})
+include_directories(${CMAKE_SOURCE_DIR}/src ${Boost_INCLUDE_DIRS} ${DCMTK_INCLUDE_DIRS})
 add_definitions(
     ${DCMTK_DEFINITIONS}
     -D BOOST_ASIO_DYN_LINK
@@ -19,7 +17,7 @@ option(INSTALL_EXAMPLES "Install the examples" OFF)
 foreach(example_file ${examples})
     get_filename_component(example ${example_file} NAME_WE)
     add_executable(${example} ${example_file})
-    target_link_libraries(${example} libodil)
+    target_link_libraries(${example} libodil jsoncpp_lib_static)
     if(INSTALL_EXAMPLES)
         install(TARGETS ${example} RUNTIME DESTINATION bin)
     endif()

@@ -1,10 +1,9 @@
 find_package(Boost REQUIRED COMPONENTS python)
-find_package(JsonCpp REQUIRED)
+find_package(jsoncpp REQUIRED)
 find_package(PythonLibs 2.7 REQUIRED)
 
 include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}/../src ${Boost_INCLUDE_DIRS}
-    ${JsonCpp_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS})
+    ${CMAKE_CURRENT_SOURCE_DIR}/../src ${Boost_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
 
 file(GLOB_RECURSE files "*.cpp")
@@ -16,4 +15,4 @@ if(APPLE)
 endif()
 
 target_link_libraries(
-    pyodil ${Boost_LIBRARIES} ${JsonCpp_LIBRARIES} libodil ${PYTHON_LIBRARIES})
+    pyodil ${Boost_LIBRARIES} jsoncpp_lib_static libodil ${PYTHON_LIBRARIES})
