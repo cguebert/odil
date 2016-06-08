@@ -1,14 +1,26 @@
 find_package(Boost REQUIRED COMPONENTS filesystem system)
-find_package(DCMTK REQUIRED)
 find_package(ICU REQUIRED)
 find_package(jsoncpp REQUIRED)
 find_package(log4cpp REQUIRED)
+
+if(HAVE_DMCTK)
+    find_package(DCMTK REQUIRED)
+endif()
 
 file(GLOB_RECURSE Header_Files "*.h")
 file(GLOB_RECURSE Source_Files "*.cpp")
 file(GLOB_RECURSE templates "*.txx")
 
 list(APPEND Header_Files ${templates})
+
+# Remove the DCMTK files
+if(NOT HAVE_DCMTK)
+    file(GLOB_RECURSE dcmtk_files "odil/dcmtk/*.*")
+    foreach(dcmtk_file ${dcmtk_files})
+        list(REMOVE_ITEM Header_Files ${dcmtk_file})
+        list(REMOVE_ITEM Source_Files ${dcmtk_file})
+    endforeach(dcmtk_file)
+endif()
 
 # Regroup files by folder
 GroupFiles(Header_Files)
@@ -17,10 +29,9 @@ GroupFiles(Source_Files)
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${Boost_INCLUDE_DIRS}
-    ${DCMTK_INCLUDE_DIRS}
     ${ICU_INCLUDE_DIRS})
+
 add_definitions(
-    ${DCMTK_DEFINITIONS}
     -D BOOST_ASIO_SEPARATE_COMPILATION
     -D ODIL_MAJOR_VERSION=${odil_MAJOR_VERSION}
 )
@@ -32,9 +43,14 @@ set_target_properties(libodil PROPERTIES OUTPUT_NAME odil)
 target_link_libraries(libodil PRIVATE
     ${Boost_LIBRARIES}
     ${ICU_LIBRARIES}
-    dcmdata ofstd oflog
     jsoncpp_lib_static
     log4cpp)
+
+if(HAVE_DCMTK)
+    include_directories(${DCMTK_INCLUDE_DIRS})
+    add_definitions(${DCMTK_DEFINITIONS})
+    target_link_libraries(libodil PRIVATE dcmdata ofstd oflog)
+endif()
 
 if(WIN32)
     add_definitions(-D BUILDING_ODIL 

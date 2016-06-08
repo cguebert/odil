@@ -12,6 +12,8 @@ option(BUILD_WRAPPERS "Build the Python Wrappers." ON)
 option(BUILD_SHARED_LIBS "Build Odil with shared libraries." ON)
 option(BUILD_INSTALL "Generate the install target." ON)
 
+option(HAVE_DMCTK "Use and link with DCMTK" ON)
+
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}" ${CMAKE_MODULE_PATH})
 include(CTest)
 include(cmake/functions.cmake)
