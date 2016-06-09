@@ -3,7 +3,7 @@ find_package(ICU REQUIRED)
 find_package(jsoncpp REQUIRED)
 find_package(log4cpp REQUIRED)
 
-if(HAVE_DMCTK)
+if(WITH_DMCTK)
     find_package(DCMTK REQUIRED)
 endif()
 
@@ -13,13 +13,10 @@ file(GLOB_RECURSE templates "*.txx")
 
 list(APPEND Header_Files ${templates})
 
-# Remove the DCMTK files
-if(NOT HAVE_DCMTK)
-    file(GLOB_RECURSE dcmtk_files "odil/dcmtk/*.*")
-    foreach(dcmtk_file ${dcmtk_files})
-        list(REMOVE_ITEM Header_Files ${dcmtk_file})
-        list(REMOVE_ITEM Source_Files ${dcmtk_file})
-    endforeach(dcmtk_file)
+if(NOT WITH_DCMTK)
+    set(pattern "${CMAKE_CURRENT_SOURCE_DIR}/odil/dcmtk/[^;]+[;$]")
+    string(REGEX REPLACE ${pattern} "" Header_Files "${Header_Files}")
+    string(REGEX REPLACE ${pattern} "" Source_Files "${Source_Files}")
 endif()
 
 # Regroup files by folder
