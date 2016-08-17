@@ -66,7 +66,21 @@ MoveSCP
 {
     message::CMoveRequest const request(message);
 
-    auto move_association = this->_generator->get_association(request);
+    Association move_association;
+    try
+    {
+        move_association = this->_generator->get_association(request);
+    }
+    catch(odil::Exception const &)
+    {
+        message::CMoveResponse response(
+            request.get_message_id(),
+            message::CMoveResponse::RefusedMoveDestinationUnknown);
+        this->_association.send_message(
+            response, request.get_affected_sop_class_uid());
+        return;
+    }
+
     move_association.associate();
     StoreSCU store_scu(move_association);
 
@@ -123,8 +137,9 @@ MoveSCP
         final_status = e.status;
         status_fields = e.status_fields;
     }
-    catch(odil::Exception const &)
+    catch(odil::Exception const & e)
     {
+        status_fields.add(registry::ErrorComment, {e.what()});
         final_status = message::CMoveResponse::UnableToProcess;
     }
 
