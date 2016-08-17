@@ -547,4 +547,25 @@ Association
     return ++this->_next_message_id;
 }
 
+std::string 
+Association
+::get_transfer_syntax_by_id(int presentation_context_id)
+{
+     auto const transfer_syntax_it =
+        this->_transfer_syntaxes_by_id.find(presentation_context_id);
+    if(transfer_syntax_it == this->_transfer_syntaxes_by_id.end())
+    {
+        throw Exception("No such Presentation Context ID");
+    }
+
+    return transfer_syntax_it->second;
+}
+
+dul::StateMachine&
+Association
+::get_state_machine()
+{
+    return _state_machine;
+}
+
 }

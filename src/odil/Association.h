@@ -178,6 +178,12 @@ public:
     /// @brief Return the next available message id.
     uint16_t next_message_id();
 
+    /// @brief Return the transfer syntax corresponding to this context id
+    std::string get_transfer_syntax_by_id(int presentation_context_id);
+
+    /// @brief Return the state machine used by this association
+    dul::StateMachine& get_state_machine();
+
     /// @}
 
 private:
