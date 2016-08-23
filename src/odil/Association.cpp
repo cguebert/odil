@@ -244,8 +244,8 @@ Association
                 }
 
                 this->_transfer_syntaxes_by_id[pc.id] = pc.transfer_syntaxes[0];
-                this->_transfer_syntaxes_by_abstract_syntax[pc.abstract_syntax] =
-                    {pc.id, pc.transfer_syntaxes[0]};
+                this->_transfer_syntaxes_by_abstract_syntax[pc.abstract_syntax].emplace_back(
+                    pc.id, pc.transfer_syntaxes[0]);
             }
         }
         else if(rejection != nullptr)
@@ -315,8 +315,8 @@ Association
             }
 
             this->_transfer_syntaxes_by_id[pc.id] = pc.transfer_syntaxes[0];
-            this->_transfer_syntaxes_by_abstract_syntax[pc.abstract_syntax] =
-                {pc.id, pc.transfer_syntaxes[0]};
+            this->_transfer_syntaxes_by_abstract_syntax[pc.abstract_syntax].emplace_back(
+                pc.id, pc.transfer_syntaxes[0]);
         }
 
         data.pdu = std::make_shared<pdu::AAssociateAC>(
@@ -462,15 +462,37 @@ Association
         throw Exception("Not associated");
     }
     
-    auto const transfer_syntax_it =
+    // First we get the list of transfer syntaxes for the given abstract syntax
+    auto const transfer_syntaxes_it =
         this->_transfer_syntaxes_by_abstract_syntax.find(abstract_syntax);
-    if(transfer_syntax_it == this->_transfer_syntaxes_by_abstract_syntax.end())
+    if(transfer_syntaxes_it == this->_transfer_syntaxes_by_abstract_syntax.end()
+       || transfer_syntaxes_it->second.empty())
     {
         throw Exception("No transfer syntax for "+abstract_syntax);
     }
 
-    auto const & transfer_syntax = transfer_syntax_it->second.second;
-    auto const & id = transfer_syntax_it->second.first;
+    // Then find the presentation context for the transfer syntax of the data set
+    auto const data_set_transfer_syntax = message.get_data_set().get_transfer_syntax();
+    std::string transfer_syntax;
+    uint8_t id;
+    if (message.has_data_set())
+    {
+        auto const& list = transfer_syntaxes_it->second;
+        auto it = std::find_if(list.begin(), list.end(), [&data_set_transfer_syntax](ContextTransferSyntaxPair const& ctsp) {
+            return ctsp.second == data_set_transfer_syntax;
+        });
+        if (it == list.end())
+        {
+            throw Exception("No presentation context for class " + abstract_syntax + " and transfer syntax " + data_set_transfer_syntax);
+        }
+
+        std::tie(id, transfer_syntax) = *it;
+    }
+    else
+    {
+        // If there is no data set, we choose the first presentation context by default
+        std::tie(id, transfer_syntax) = transfer_syntaxes_it->second.front();
+    }
 
     std::vector<pdu::PDataTF::PresentationDataValueItem> pdv_items;
 
@@ -496,7 +518,7 @@ Association
         if (!max_length 
             || (current_length + data_buffer.size() + 6 < max_length))
         {   // Can send all the buffer in one go
-            pdv_items.emplace_back(transfer_syntax_it->second.first, 2, data_buffer);
+            pdv_items.emplace_back(id, 2, data_buffer);
 
             dul::EventData data;
             data.pdu = std::make_shared<pdu::PDataTF>(pdv_items);
@@ -511,7 +533,7 @@ Association
             if (available > 0) // Send some data with the command set
             {
                 remaining -= available;
-                pdv_items.emplace_back(transfer_syntax_it->second.first, (remaining > 0 ? 0 : 2), data_buffer.substr(0, available));
+                pdv_items.emplace_back(id, (remaining > 0 ? 0 : 2), data_buffer.substr(0, available));
                 offset += available;
             }
 
@@ -525,7 +547,7 @@ Association
             {
                 remaining -= available;
                 pdv_items.clear();
-                pdv_items.emplace_back(transfer_syntax_it->second.first, (remaining > 0 ? 0 : 2), data_buffer.substr(offset, available));
+                pdv_items.emplace_back(id, (remaining > 0 ? 0 : 2), data_buffer.substr(offset, available));
                 offset += available;
                 pdu->set_pdv_items(pdv_items);
                 this->_state_machine.send_pdu(data);

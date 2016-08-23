@@ -195,8 +195,9 @@ private:
     AssociationParameters _association_parameters;
     AssociationParameters _negotiated_parameters;
 
-    std::map<std::string, std::pair<uint8_t, std::string>>
-        _transfer_syntaxes_by_abstract_syntax;
+    using ContextTransferSyntaxPair = std::pair<uint8_t, std::string>;
+    using ContextTransferSyntaxPairs = std::vector<ContextTransferSyntaxPair>;
+    std::map<std::string, ContextTransferSyntaxPairs> _transfer_syntaxes_by_abstract_syntax;
     std::map<uint8_t, std::string> _transfer_syntaxes_by_id;
 
     uint16_t _next_message_id;
