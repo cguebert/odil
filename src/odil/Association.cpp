@@ -472,21 +472,29 @@ Association
     }
 
     // Then find the presentation context for the transfer syntax of the data set
-    auto const data_set_transfer_syntax = message.get_data_set().get_transfer_syntax();
     std::string transfer_syntax;
     uint8_t id;
     if (message.has_data_set())
     {
-        auto const& list = transfer_syntaxes_it->second;
-        auto it = std::find_if(list.begin(), list.end(), [&data_set_transfer_syntax](ContextTransferSyntaxPair const& ctsp) {
-            return ctsp.second == data_set_transfer_syntax;
-        });
-        if (it == list.end())
+        auto const data_set_transfer_syntax = message.get_data_set().get_transfer_syntax();
+        if (data_set_transfer_syntax.empty())
         {
-            throw Exception("No presentation context for class " + abstract_syntax + " and transfer syntax " + data_set_transfer_syntax);
+            // If there is no specified transfer syntax, we choose the first presentation context by default
+            std::tie(id, transfer_syntax) = transfer_syntaxes_it->second.front();
         }
+        else
+        {
+            auto const& list = transfer_syntaxes_it->second;
+            auto it = std::find_if(list.begin(), list.end(), [&data_set_transfer_syntax](ContextTransferSyntaxPair const& ctsp) {
+                return ctsp.second == data_set_transfer_syntax;
+            });
+            if (it == list.end())
+            {
+                throw Exception("No presentation context for class " + abstract_syntax + " and transfer syntax " + data_set_transfer_syntax);
+            }
 
-        std::tie(id, transfer_syntax) = *it;
+            std::tie(id, transfer_syntax) = *it;
+        }
     }
     else
     {
