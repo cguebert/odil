@@ -157,9 +157,9 @@ Transport
     }
     if(this->is_open())
     {
-        this->_socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
-        this->_socket->close();
-        this->_socket = nullptr;
+    //    this->_socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+    //    this->_socket->close();
+        this->_socket = nullptr; // The destructor of the socket object takes care of everything
     }
 }
 
