@@ -1,10 +1,13 @@
 find_package(Boost REQUIRED COMPONENTS filesystem system)
-find_package(ICU REQUIRED)
-find_package(jsoncpp REQUIRED)
 find_package(log4cpp REQUIRED)
 
 if(WITH_DMCTK)
     find_package(DCMTK REQUIRED)
+endif()
+
+if(WITH_JSON)
+    find_package(ICU REQUIRED)
+    find_package(jsoncpp REQUIRED)
 endif()
 
 file(GLOB_RECURSE Header_Files "*.h")
@@ -19,49 +22,60 @@ if(NOT WITH_DCMTK)
     string(REGEX REPLACE ${pattern} "" Source_Files "${Source_Files}")
 endif()
 
+if(NOT WITH_JSON)
+    set(pattern "${CMAKE_CURRENT_SOURCE_DIR}/odil/(json_converter|unicode)[^;]+[;$]")
+    string(REGEX REPLACE ${pattern} "" Header_Files "${Header_Files}")
+    string(REGEX REPLACE ${pattern} "" Source_Files "${Source_Files}")
+endif()
+
 # Regroup files by folder
 GroupFiles(Header_Files)
 GroupFiles(Source_Files)
 
-include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${Boost_INCLUDE_DIRS}
-    ${ICU_INCLUDE_DIRS})
-
-add_definitions(
-    -D BOOST_ASIO_SEPARATE_COMPILATION
-    -D ODIL_MAJOR_VERSION=${odil_MAJOR_VERSION}
-)
-link_directories(${Boost_LIBRARY_DIRS})
-
 add_library(libodil ${Source_Files} ${Header_Files})
 set_target_properties(libodil PROPERTIES OUTPUT_NAME odil)
 
+target_include_directories(libodil 
+    PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    INTERFACE
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:include>)
+
+target_compile_definitions(libodil
+    PRIVATE
+    BOOST_ASIO_SEPARATE_COMPILATION
+    ODIL_MAJOR_VERSION=${odil_MAJOR_VERSION}
+)
+
 target_link_libraries(libodil PRIVATE
-    ${Boost_LIBRARIES}
-    ${ICU_LIBRARIES}
-    jsoncpp_lib_static
+    Boost::filesystem
     log4cpp)
 
+if(WITH_JSON)
+    target_include_directories(libodil PRIVATE ${ICU_INCLUDE_DIRS})
+    target_link_libraries(libodil PRIVATE
+        ${ICU_LIBRARIES}
+        jsoncpp_lib_static)
+endif()
+
 if(HAVE_DCMTK)
-    include_directories(${DCMTK_INCLUDE_DIRS})
+    target_include_directories(libodil PUBLIC ${DCMTK_INCLUDE_DIRS})
     add_definitions(${DCMTK_DEFINITIONS})
     target_link_libraries(libodil PRIVATE dcmdata ofstd oflog)
 endif()
 
 if(WIN32)
-    add_definitions(-D BUILDING_ODIL 
-                    -D BOOST_ALL_NO_LIB)
+    target_compile_definitions(libodil
+    PRIVATE
+        BUILDING_ODIL
+        BOOST_ALL_NO_LIB)
     target_link_libraries(libodil PRIVATE netapi32)
 endif()
 
 set_target_properties(libodil PROPERTIES
     VERSION ${odil_VERSION}
     SOVERSION ${odil_MAJOR_VERSION})
-
-target_include_directories(libodil INTERFACE
-  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
-  $<INSTALL_INTERFACE:include>)
 
 if (BUILD_INSTALL)
     set(odil_cmake_dir lib/cmake/odil)
