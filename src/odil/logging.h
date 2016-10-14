@@ -9,10 +9,20 @@
 #ifndef _5382f5e0_e993_4966_9447_542844edb635
 #define _5382f5e0_e993_4966_9447_542844edb635
 
+#ifdef WITH_LOGGING
+
 #include <log4cpp/Category.hh>
 #include <log4cpp/Priority.hh>
 
 #define ODIL_LOG(level) \
     log4cpp::Category::getInstance("odil") << log4cpp::Priority::level
+
+#else
+
+#include <iostream>
+
+#define ODIL_LOG(level) std::cerr 
+
+#endif
 
 #endif // _5382f5e0_e993_4966_9447_542844edb635

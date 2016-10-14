@@ -8,6 +8,8 @@
 
 #include <iostream>
 
+#ifdef WITH_LOGGING
+
 #include <log4cpp/Category.hh>
 #include <log4cpp/OstreamAppender.hh>
 #include <log4cpp/Priority.hh>
@@ -35,3 +37,5 @@ static bool const configured = configure();
 }
 
 }
+
+#endif

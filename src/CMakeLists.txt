@@ -1,5 +1,4 @@
 find_package(Boost REQUIRED COMPONENTS filesystem system)
-find_package(log4cpp REQUIRED)
 
 if(WITH_DMCTK)
     find_package(DCMTK REQUIRED)
@@ -8,6 +7,10 @@ endif()
 if(WITH_JSON)
     find_package(ICU REQUIRED)
     find_package(jsoncpp REQUIRED)
+endif()
+
+if(WITH_LOGGING)
+    find_package(log4cpp REQUIRED)
 endif()
 
 file(GLOB_RECURSE Header_Files "*.h")
@@ -49,14 +52,18 @@ target_compile_definitions(libodil
 )
 
 target_link_libraries(libodil PRIVATE
-    Boost::filesystem
-    log4cpp)
+    Boost::filesystem)
 
 if(WITH_JSON)
     target_include_directories(libodil PRIVATE ${ICU_INCLUDE_DIRS})
     target_link_libraries(libodil PRIVATE
         ${ICU_LIBRARIES}
         jsoncpp_lib_static)
+endif()
+
+if(WITH_LOGGING)
+    target_compile_definitions(libodil PRIVATE WITH_LOGGING)
+    target_link_libraries(libodil PRIVATE log4cpp)
 endif()
 
 if(HAVE_DCMTK)
