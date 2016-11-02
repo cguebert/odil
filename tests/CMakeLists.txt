@@ -20,6 +20,13 @@ if(NOT WITH_DCMTK)
         ${CMAKE_SOURCE_DIR}/src/odil/dcmtk/Exception.cpp)
 endif()
 
+if(NOT WITH_WITH_JSON)
+    list(
+        REMOVE_ITEM tests
+        ${CMAKE_CURRENT_SOURCE_DIR}/code/json_converter.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/code/unicode.cpp)
+endif()
+
 include_directories(${CMAKE_SOURCE_DIR}/src ${Boost_INCLUDE_DIRS} ${DCMTK_INCLUDE_DIRS})
 add_definitions(
     ${DCMTK_DEFINITIONS}

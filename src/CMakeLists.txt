@@ -1,4 +1,4 @@
-find_package(Boost REQUIRED COMPONENTS filesystem system)
+find_package(Boost REQUIRED COMPONENTS filesystem system date_time)
 
 if(WITH_DMCTK)
     find_package(DCMTK REQUIRED)
@@ -52,7 +52,8 @@ target_compile_definitions(libodil
 )
 
 target_link_libraries(libodil PRIVATE
-    Boost::filesystem)
+    Boost::filesystem
+    Boost::date_time)
 
 if(WITH_JSON)
     target_include_directories(libodil PRIVATE ${ICU_INCLUDE_DIRS})
