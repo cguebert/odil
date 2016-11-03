@@ -33,9 +33,6 @@ if(WIN32)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
     endif()
 
-    # We want to put the debug targets in the same directory, so we have to set a postfix
-    set(CMAKE_DBUG_POSTFIX "_d")
-
     # We have to set _WIN32_WINNT for Asio
     if(${CMAKE_SYSTEM_VERSION} EQUAL 10) # Windows 10
         add_definitions(-D _WIN32_WINNT=0x0A00)
