@@ -1,4 +1,4 @@
-find_package(Boost COMPONENTS unit_test_framework REQUIRED)
+find_package(Boost COMPONENTS unit_test_framework filesystem date_time REQUIRED)
 find_package(DCMTK REQUIRED)
 find_package(jsoncpp REQUIRED)
 
@@ -70,6 +70,10 @@ foreach(test_file ${tests})
         set(case "${vr}ToOdil")
         add_test("${test}_${case}" "${test}" "--run_test=${case}")
     endforeach()
+
+    if(WIN32)
+        target_compile_definitions(test_${test} PRIVATE BOOST_ALL_NO_LIB)
+    endif()
 
 endforeach()
 
