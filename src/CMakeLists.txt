@@ -120,4 +120,9 @@ if (BUILD_INSTALL)
         FILES ${project_config} ${version_config}
         DESTINATION ${odil_cmake_dir})
     install(EXPORT ${targets_export_name} DESTINATION ${odil_cmake_dir})
+	
+	if (BUILD_TESTING AND WIN32) # Need to copy the necessary dlls to the test folder
+		install(TARGETS libodil RUNTIME DESTINATION ${CMAKE_BINARY_DIR}/tests/Release CONFIGURATIONS Release)
+		install(TARGETS libodil RUNTIME DESTINATION ${CMAKE_BINARY_DIR}/tests/Debug CONFIGURATIONS Debug)
+	endif()
 endif ()

@@ -30,3 +30,43 @@ macro(GroupFiles fileGroup)
         source_group("${groupName}" FILES ${currentFile})		# Put the file in this group
     endforeach()
 endmacro()
+
+function(GetRuntime var_name)
+	if(${var_name})
+		set(${var_name} "" PARENT_SCOPE) # First clear the variable in case we do not find the dll
+		string(REPLACE ".lib" ".dll" dll_path ${${var_name}}) # First look for the dll in the same directory
+		if(EXISTS ${dll_path})
+			set(${var_name} ${dll_path} PARENT_SCOPE)
+		else()
+		# Else look for it in a sibling directory called bin
+			get_filename_component(filename ${dll_path} NAME) # Get the file name
+			get_filename_component(dir ${dll_path} PATH) # Directory of the .lib
+			get_filename_component(dir ${dir} PATH) # /..
+			set(dll_path ${dir}/bin/${filename})
+			if(EXISTS ${dll_path})
+				set(${var_name} ${dll_path} PARENT_SCOPE)
+			endif()
+		endif()
+	endif()
+endfunction()
+
+function(InstallDependency export_lib dest)
+	get_target_property(export_lib_path ${export_lib} IMPORTED_LOCATION_RELEASE)
+	GetRuntime(export_lib_path)
+	if(export_lib_path)
+		install(FILES ${export_lib_path} DESTINATION ${dest}/Release CONFIGURATIONS Release)
+	endif()
+		
+	get_target_property(export_lib_path ${export_lib} IMPORTED_LOCATION_DEBUG)
+	GetRuntime(export_lib_path)
+	if(export_lib_path)
+		install(FILES ${export_lib_path} DESTINATION ${dest}/Debug CONFIGURATIONS Debug)
+	endif()
+		
+	get_target_property(export_lib_path ${export_lib} IMPORTED_LOCATION)
+	GetRuntime(export_lib_path)
+	if(export_lib_path)
+		install(FILES ${export_lib_path} DESTINATION ${dest}/Release CONFIGURATIONS Release)
+		install(FILES ${export_lib_path} DESTINATION ${dest}/Debug CONFIGURATIONS Debug)
+	endif()
+endfunction()

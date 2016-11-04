@@ -77,6 +77,13 @@ foreach(test_file ${tests})
 
 endforeach()
 
+# Copy the necessary dlls in the tests folder
+if(WIN32)
+	foreach(export_lib Boost::filesystem Boost::system Boost::date_time Boost::unit_test_framework)
+		InstallDependency(${export_lib} ${CMAKE_BINARY_DIR}/tests)
+	endforeach()
+endif()
+
 file(GLOB_RECURSE python_tests *.py)
 
 add_custom_target(Runner ${CMAKE_COMMAND} -E echo "Test runner" SOURCES run)
