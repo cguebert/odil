@@ -32,47 +32,27 @@ void
 DataSet
 ::add(Tag const & tag, Element const & element)
 {
-    this->_elements[tag] = element;
+    auto const iterator = this->_elements.find(tag);
+    if(iterator == this->_elements.end())
+    {
+        this->_elements.insert({tag, element});
+    }
+    else
+    {
+        iterator->second = element;
+    }
 }
-
 
 void
 DataSet
 ::add(Tag const & tag, VR vr)
 {
-    Value value;
-
     if(vr == VR::UNKNOWN)
     {
         vr = as_vr(tag);
     }
 
-    if(::odil::is_int(vr))
-    {
-        value = Value::Integers();
-    }
-    else if(::odil::is_real(vr))
-    {
-        value = Value::Reals();
-    }
-    else if(::odil::is_string(vr))
-    {
-        value = Value::Strings();
-    }
-    else if(::odil::is_binary(vr))
-    {
-        value = Value::Binary();
-    }
-    else if(vr == VR::SQ)
-    {
-        value = Value::DataSets();
-    }
-    else
-    {
-        throw Exception("Unknown VR: "+::odil::as_string(vr));
-    }
-
-    this->add(tag, Element(value, vr));
+    this->add(tag, Element(vr));
 }
 
 void
@@ -452,6 +432,19 @@ DataSet
     return !(*this == other);
 }
 
+void
+DataSet
+::clear(Tag const & tag)
+{
+    ElementMap::iterator const it = this->_elements.find(tag);
+    if(it == this->_elements.end())
+    {
+        throw Exception("No such element: "+std::string(tag));
+    }
+
+    it->second.clear();
+}
+
 std::string const &
 DataSet
 ::get_transfer_syntax() const
@@ -467,3 +460,4 @@ DataSet
 }
 
 }
+

@@ -16,6 +16,9 @@ endif()
 file(GLOB_RECURSE Header_Files "*.h")
 file(GLOB_RECURSE Source_Files "*.cpp")
 file(GLOB_RECURSE templates "*.txx")
+list(SORT Header_Files)
+list(SORT Source_Files)
+list(SORT templates)
 
 list(APPEND Header_Files ${templates})
 
