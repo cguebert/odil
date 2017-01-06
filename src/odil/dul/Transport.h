@@ -111,8 +111,8 @@ private:
 class SocketClosed: public Exception
 {
 public:
-    SocketClosed()
-    : Exception("Socket closed")
+    SocketClosed(const std::string& message)
+    : Exception(message)
     {
         // Nothing else.
     }
