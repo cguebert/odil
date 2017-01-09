@@ -14,8 +14,6 @@
 #include <boost/asio.hpp>
 #include <boost/date_time.hpp>
 
-#include "odil/Exception.h"
-
 namespace odil
 {
 

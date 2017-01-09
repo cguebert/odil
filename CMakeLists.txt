@@ -33,11 +33,6 @@ endif()
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 if(WIN32)
-    # Trying the automatic creation of .def files by CMake
-    if(${BUILD_SHARED_LIBS})
-        set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
-    endif()
-    
     # Multiprocessor build on Visual C++
     if(MSVC)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")

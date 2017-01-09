@@ -12,6 +12,8 @@
 #include "odil.h"
 #include <string>
 
+#include "odil/odil.h"
+
 namespace odil
 {
 
