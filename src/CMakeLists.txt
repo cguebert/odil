@@ -88,6 +88,21 @@ set_target_properties(libodil PROPERTIES
     VERSION ${odil_VERSION}
     SOVERSION ${odil_MAJOR_VERSION})
 
+set(DEFAULT_COMPILE_OPTIONS)
+
+if(${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
+    set(DEFAULT_COMPILE_OPTIONS ${DEFAULT_COMPILE_OPTIONS}
+        /MP     # -> build with multiple processes
+        /wd4251 # -> disable warning: 'identifier': class 'type' needs to have dll-interface to be used by clients of class 'type2'
+        /wd4275 # -> disable warning: non - DLL-interface classkey 'identifier' used as base for DLL-interface classkey 'identifier'
+    )
+
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi")
+    set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /DEBUG /OPT:REF /OPT:ICF")
+endif()
+
+target_compile_options(libodil PRIVATE ${DEFAULT_COMPILE_OPTIONS})
+
 if (BUILD_INSTALL)
     set(odil_cmake_dir lib/cmake/odil)
     set(version_config ${PROJECT_BINARY_DIR}/odil-config-version.cmake)
@@ -123,9 +138,9 @@ if (BUILD_INSTALL)
         FILES ${project_config} ${version_config}
         DESTINATION ${odil_cmake_dir})
     install(EXPORT ${targets_export_name} DESTINATION ${odil_cmake_dir})
-	
-	if (BUILD_TESTING AND WIN32) # Need to copy the necessary dlls to the test folder
-		install(TARGETS libodil RUNTIME DESTINATION ${CMAKE_BINARY_DIR}/tests/Release CONFIGURATIONS Release)
-		install(TARGETS libodil RUNTIME DESTINATION ${CMAKE_BINARY_DIR}/tests/Debug CONFIGURATIONS Debug)
-	endif()
+    
+    if (BUILD_TESTING AND WIN32) # Need to copy the necessary dlls to the test folder
+        install(TARGETS libodil RUNTIME DESTINATION ${CMAKE_BINARY_DIR}/tests/Release CONFIGURATIONS Release)
+        install(TARGETS libodil RUNTIME DESTINATION ${CMAKE_BINARY_DIR}/tests/Debug CONFIGURATIONS Debug)
+    endif()
 endif ()
