@@ -176,7 +176,13 @@ Transport
     boost::system::error_code error;
     this->_start_deadline(source, error);
 
-    boost::asio::async_read(
+    boost::asio::read(*this->_socket,
+                      boost::asio::buffer(&data[0], data.size()),
+                      error);
+    if(error)
+        throw SocketClosed("Operation error: " + error.message());
+
+/*    boost::asio::async_read(
         *this->_socket,
         boost::asio::buffer(&data[0], data.size()),
         [&source,&error](boost::system::error_code const & e, std::size_t)
@@ -186,7 +192,7 @@ Transport
         }
     );
 
-    this->_run(source, error);
+    this->_run(source, error);*/
 
     return data;
 }
@@ -204,7 +210,10 @@ Transport
     boost::system::error_code error;
     this->_start_deadline(source, error);
 
-    boost::asio::async_write(
+    boost::asio::write(*this->_socket, boost::asio::buffer(data), error);
+    if(error)
+        throw SocketClosed("Operation error: " + error.message());
+/*    boost::asio::async_write(
         *this->_socket, boost::asio::buffer(data),
         [&source,&error](boost::system::error_code const & e, std::size_t)
         {
@@ -213,13 +222,15 @@ Transport
         }
     );
 
-    this->_run(source, error);
+    this->_run(source, error);*/
 }
 
 void
 Transport
 ::_start_deadline(Source & source, boost::system::error_code & error)
 {
+    return;
+
     auto const canceled = this->_deadline.expires_from_now(this->_timeout);
     if(canceled != 0)
     {
@@ -264,7 +275,7 @@ Transport
         {
             throw SocketClosed("Operation error: " + error.message());
         }
-
+        /*
         source = Source::NONE;
         this->_stop_deadline();
 
@@ -285,7 +296,7 @@ Transport
         else if(error != boost::asio::error::operation_aborted)
         {
             throw Exception("TCP timer error: "+error.message());
-        }
+        }*/
     }
     else if(source == Source::TIMER)
     {
