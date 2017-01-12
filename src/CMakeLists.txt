@@ -49,8 +49,9 @@ target_include_directories(libodil
     $<INSTALL_INTERFACE:include>)
 
 target_compile_definitions(libodil
-    PRIVATE
+    PUBLIC
     BOOST_ASIO_SEPARATE_COMPILATION
+    PRIVATE
     ODIL_MAJOR_VERSION=${odil_MAJOR_VERSION}
 )
 
