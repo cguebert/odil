@@ -52,6 +52,7 @@ target_compile_definitions(libodil
     PUBLIC
     BOOST_ASIO_SEPARATE_COMPILATION
     PRIVATE
+	BOOST_ASIO_DYN_LINK
     ODIL_MAJOR_VERSION=${odil_MAJOR_VERSION}
 )
 
