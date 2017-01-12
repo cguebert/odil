@@ -1,0 +1,9 @@
+.gitignore
+.editorconfig
+
+# Local directories
+/build*/
+/install*/
+/doc/
+
+Doxyfile
