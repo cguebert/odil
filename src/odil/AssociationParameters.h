@@ -46,7 +46,7 @@ public:
             uint8_t id,
             std::string const & abstract_syntax,
             std::vector<std::string> const & transfer_syntaxes,
-            bool scu_role_support, bool scp_role_support,
+            bool scu_role_support, bool scp_role_support, bool role_selection_present=true,
             Result result=Result::NoReason);
 
         /// @brief Identifier of the presentation context, must be odd.
@@ -63,7 +63,10 @@ public:
         
         /// @brief Support for SCP role.
         bool scp_role_support;
-        
+
+        /// @brief Is role selection item present in user information.
+        bool role_selection_present;
+       
         /// @brief Result of the negotiation.
         Result result;
 
