@@ -35,9 +35,9 @@ AssociationParameters::PresentationContext
     uint8_t id,
     std::string const & abstract_syntax,
     std::vector<std::string> const & transfer_syntaxes,
-    bool scu_role_support, bool scp_role_support, Result result)
+    bool scu_role_support, bool scp_role_support, bool role_selection_present, Result result)
 : id(id), abstract_syntax(abstract_syntax), transfer_syntaxes(transfer_syntaxes),
-  scu_role_support(scu_role_support), scp_role_support(scp_role_support),
+  scu_role_support(scu_role_support), scp_role_support(scp_role_support),role_selection_present(role_selection_present),
   result(result)
 {
     // Nothing else.
@@ -53,6 +53,7 @@ AssociationParameters::PresentationContext
         this->transfer_syntaxes == other.transfer_syntaxes &&
         this->scu_role_support == other.scu_role_support &&
         this->scp_role_support == other.scp_role_support &&
+        this->role_selection_present == other.role_selection_present &&
         this->result == other.result
     );
 }
@@ -146,7 +147,8 @@ AssociationParameters
             pc_pdu.get_id(),
             pc_pdu.get_abstract_syntax(), pc_pdu.get_transfer_syntaxes(),
             (it!=roles_map.end())?it->second.first:true,
-            (it!=roles_map.end())?it->second.second:false);
+            (it!=roles_map.end())?it->second.second:false,
+            it!=roles_map.end());
     }
     this->set_presentation_contexts(pcs_parameters);
 
@@ -248,6 +250,7 @@ AssociationParameters
             std::vector<std::string>{ pc_pdu.get_transfer_syntax() },
             (it!=roles_map.end())?it->second.first:pc_request.scu_role_support,
             (it!=roles_map.end())?it->second.second:pc_request.scp_role_support,
+            it!=roles_map.end(),
             static_cast<PresentationContext::Result>(pc_pdu.get_result_reason()));
     }
     this->set_presentation_contexts(pcs_parameters);
@@ -622,11 +625,14 @@ AssociationParameters
     std::vector<pdu::RoleSelection> roles;
     for(auto const & presentation_context: this->get_presentation_contexts())
     {
-        pdu::RoleSelection const role(
-            presentation_context.abstract_syntax,
-            presentation_context.scu_role_support,
-            presentation_context.scp_role_support);
-        roles.push_back(role);
+        if (presentation_context.role_selection_present)
+        {
+            pdu::RoleSelection const role(
+                presentation_context.abstract_syntax,
+                presentation_context.scu_role_support,
+                presentation_context.scp_role_support);
+            roles.push_back(role);
+        }
     }
     user_information.set_sub_items(roles);
 
