@@ -28,11 +28,10 @@ if(NOT WITH_WITH_JSON)
 endif()
 
 include_directories(${CMAKE_SOURCE_DIR}/src ${Boost_INCLUDE_DIRS} ${DCMTK_INCLUDE_DIRS})
+
 add_definitions(
     ${DCMTK_DEFINITIONS}
-    -D BOOST_ASIO_DYN_LINK
     -D ODIL_MAJOR_VERSION=${odil_MAJOR_VERSION}
-    -DBOOST_TEST_DYN_LINK
 )
 link_directories(${Boost_LIBRARY_DIRS})
 
@@ -71,7 +70,7 @@ foreach(test_file ${tests})
         add_test("${test}_${case}" "${test}" "--run_test=${case}")
     endforeach()
 
-    if(WIN32)
+    if(BUILD_SHARED_LIBS)
         target_compile_definitions(test_${test} PRIVATE BOOST_ALL_NO_LIB)
     endif()
 

@@ -14,6 +14,9 @@ option(BUILD_INSTALL "Generate the install target." ON)
 option(WITH_DCMTK "Build the DCMTK converter" ON)
 option(WITH_JSON "Build the JSON converter" ON)
 option(WITH_LOGGING "Use the log4cpp library for logging" ON)
+option(
+    USE_BUILTIN_DCMTK_GETSCU
+    "Compile a locally packaged version of getscu for old DCMTK versions" ON)
 
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}" ${CMAKE_MODULE_PATH})
