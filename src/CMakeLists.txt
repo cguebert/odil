@@ -52,7 +52,7 @@ target_compile_definitions(libodil
     PUBLIC
     BOOST_ASIO_SEPARATE_COMPILATION
     PRIVATE
-	BOOST_ASIO_DYN_LINK
+    BOOST_ASIO_DYN_LINK
     ODIL_MAJOR_VERSION=${odil_MAJOR_VERSION}
 )
 
@@ -74,7 +74,7 @@ endif()
 
 if(HAVE_DCMTK)
     target_include_directories(libodil PUBLIC ${DCMTK_INCLUDE_DIRS})
-    add_definitions(${DCMTK_DEFINITIONS})
+    target_compile_definitions(libodil PRIVATE ${DCMTK_DEFINITIONS})
     target_link_libraries(libodil PRIVATE dcmdata ofstd oflog)
 endif()
 
