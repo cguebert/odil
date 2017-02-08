@@ -72,38 +72,12 @@ StateMachine
     auto const & next_state = transition_iterator->second.second;
 
     // Do action
-    if(action == Action::AE_1) { this->AE_1(data); }
-    else if(action == Action::AE_2) { this->AE_2(data); }
-    else if(action == Action::AE_3) { this->AE_3(data); }
-    else if(action == Action::AE_4) { this->AE_4(data); }
-    else if(action == Action::AE_5) { this->AE_5(data); }
-    else if(action == Action::AE_6) { this->AE_6(data); }
-    else if(action == Action::AE_7) { this->AE_7(data); }
-    else if(action == Action::AE_8) { this->AE_8(data); }
-    else if(action == Action::DT_1) { this->DT_1(data); }
-    else if(action == Action::DT_2) { this->DT_2(data); }
-    else if(action == Action::AR_1) { this->AR_1(data); }
-    else if(action == Action::AR_2) { this->AR_2(data); }
-    else if(action == Action::AR_3) { this->AR_3(data); }
-    else if(action == Action::AR_4) { this->AR_4(data); }
-    else if(action == Action::AR_5) { this->AR_5(data); }
-    else if(action == Action::AR_6) { this->AR_6(data); }
-    else if(action == Action::AR_7) { this->AR_7(data); }
-    else if(action == Action::AR_8) { this->AR_8(data); }
-    else if(action == Action::AR_9) { this->AR_9(data); }
-    else if(action == Action::AR_10) { this->AR_10(data); }
-    else if(action == Action::AA_1) { this->AA_1(data); }
-    else if(action == Action::AA_2) { this->AA_2(data); }
-    else if(action == Action::AA_3) { this->AA_3(data); }
-    else if(action == Action::AA_4) { this->AA_4(data); }
-    else if(action == Action::AA_5) { this->AA_5(data); }
-    else if(action == Action::AA_6) { this->AA_6(data); }
-    else if(action == Action::AA_7) { this->AA_7(data); }
-    else if(action == Action::AA_8) { this->AA_8(data); }
-    else
+    auto const action_index = static_cast<size_t>(action);
+    if (action_index > _actions.size())
     {
         throw Exception("Unknown action");
     }
+    (this->*_actions[action_index])(data);
 
     this->_state = next_state;
 }
@@ -162,37 +136,31 @@ StateMachine
     auto const & item = data.pdu->get_item();
     auto const type = item.as_unsigned_int_8("PDU-type");
 
-    if(type == 0x01)
+    switch (type)
     {
+    case 0x01:
         this->transition(Event::AAssociateRQLocal, data);
         this->transition(Event::TransportConnectionConfirmation, data);
-    }
-    else if(type == 0x02)
-    {
+        break;
+    case 0x02:
         this->transition(Event::AAssociateACLocal, data);
-    }
-    else if(type == 0x03)
-    {
+        break;
+    case 0x03:
         this->transition(Event::AAssociateRJLocal, data);
-    }
-    else if(type == 0x04)
-    {
+        break;
+    case 0x04:
         this->transition(Event::PDataTFLocal, data);
-    }
-    else if(type == 0x05)
-    {
+        break;
+    case 0x05:
         this->transition(Event::AReleaseRQLocal, data);
-    }
-    else if(type == 0x06)
-    {
+        break;
+    case 0x06:
         this->transition(Event::AReleaseRPLocal, data);
-    }
-    else if(type == 0x07)
-    {
+        break;
+    case 0x07:
         this->transition(Event::AAbortLocal, data);
-    }
-    else
-    {
+        break;
+    default:
         this->transition(Event::InvalidPDU, data);
     }
 }
@@ -214,43 +182,37 @@ StateMachine
 
     data.pdu=nullptr;
     Event event = Event::None;
-    if(type == 0x01)
+    switch (type)
     {
+    case 0x01:
         data.pdu = std::make_shared<pdu::AAssociateRQ>(stream);
         event = Event::AAssociateRQRemote;
-    }
-    else if(type == 0x02)
-    {
+        break;
+    case 0x02:
         data.pdu = std::make_shared<pdu::AAssociateAC>(stream);
         event = Event::AAssociateACRemote;
-    }
-    else if(type == 0x03)
-    {
+        break;
+    case 0x03:
         data.pdu = std::make_shared<pdu::AAssociateRJ>(stream);
         event = Event::AAssociateRJRemote;
-    }
-    else if(type == 0x04)
-    {
+        break;
+    case 0x04:
         data.pdu = std::make_shared<pdu::PDataTF>(stream);
         event = Event::PDataTFRemote;
-    }
-    else if(type == 0x05)
-    {
+        break;
+    case 0x05:
         data.pdu = std::make_shared<pdu::AReleaseRQ>(stream);
         event = Event::AReleaseRQRemote;
-    }
-    else if(type == 0x06)
-    {
+        break;
+    case 0x06:
         data.pdu = std::make_shared<pdu::AReleaseRP>(stream);
         event = Event::AReleaseRPRemote;
-    }
-    else if(type == 0x07)
-    {
+        break;
+    case 0x07:
         data.pdu = std::make_shared<pdu::AAbort>(stream);
         event = Event::AAbortRemote;
-    }
-    else
-    {
+        break;
+    default:
         event = Event::InvalidPDU;
     }
 
@@ -478,6 +440,9 @@ StateMachine
     transition(Sta13, InvalidPDU, AA_7, Sta13),
 };
 
+#undef transition
+#undef transition_full
+
 StateMachine::GuardMap const
 StateMachine
 ::_guards = {
@@ -502,8 +467,41 @@ StateMachine
     },
 };
 
-#undef transition
-#undef transition_full
+StateMachine::ActionList const
+StateMachine
+::_actions = {
+    &StateMachine::AE_1,
+    &StateMachine::AE_2,
+    &StateMachine::AE_3,
+    &StateMachine::AE_4,
+    &StateMachine::AE_5,
+    &StateMachine::AE_6,
+    &StateMachine::AE_7,
+    &StateMachine::AE_8,
+
+    &StateMachine::DT_1,
+    &StateMachine::DT_2,
+
+    &StateMachine::AR_1,
+    &StateMachine::AR_2,
+    &StateMachine::AR_3,
+    &StateMachine::AR_4,
+    &StateMachine::AR_5,
+    &StateMachine::AR_6,
+    &StateMachine::AR_7,
+    &StateMachine::AR_8,
+    &StateMachine::AR_9,
+    &StateMachine::AR_10,
+
+    &StateMachine::AA_1,
+    &StateMachine::AA_2,
+    &StateMachine::AA_3,
+    &StateMachine::AA_4,
+    &StateMachine::AA_5,
+    &StateMachine::AA_6,
+    &StateMachine::AA_7,
+    &StateMachine::AA_8
+};
 
 void
 StateMachine

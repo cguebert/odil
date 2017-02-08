@@ -13,6 +13,7 @@
 #include <map>
 #include <tuple>
 #include <utility>
+#include <vector>
 
 #include <boost/asio.hpp>
 
@@ -143,8 +144,12 @@ private:
         std::pair<State, Event>,
         std::function<bool(StateMachine const &, EventData &)>> GuardMap;
 
+    typedef void (StateMachine::*ActionFunction)(EventData &);
+    typedef std::vector<ActionFunction> ActionList;
+
     static TransitionMap const _transitions;
     static GuardMap const _guards;
+    static ActionList const _actions;
 
     /// @brief Current state.
     State _state;
