@@ -166,9 +166,7 @@ Transport
 ::read(std::size_t length)
 {
     if(!this->is_open())
-    {
-        throw Exception("Not connected");
-    }
+        throw SocketClosed("Not connected");
 
     std::string data(length, 'a');
 
@@ -202,9 +200,7 @@ Transport
 ::write(std::string const & data)
 {
     if(!this->is_open())
-    {
-        throw Exception("Not connected");
-    }
+        throw SocketClosed("Not connected");
 
     auto source = Source::NONE;
     boost::system::error_code error;
