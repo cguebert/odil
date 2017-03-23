@@ -70,10 +70,10 @@ struct ODIL_API Transport
     void connect(Socket::endpoint_type const & peer_endpoint);
 
     /**
-     * @brief Receive a connection on the specified endpoint, raise an
+     * @brief Receive a connection on the specified socket, raise an
      * exception upon error.
      */
-    void receive(Socket::endpoint_type const & endpoint);
+    void receive(std::shared_ptr<Socket> socket);
 
     /// @brief Close the connection.
     void close();
@@ -89,8 +89,6 @@ private:
     std::shared_ptr<Socket> _socket;
     duration_type _timeout;
     boost::asio::deadline_timer _deadline;
-
-    std::shared_ptr<boost::asio::ip::tcp::acceptor> _acceptor;
 
     enum class Source
     {

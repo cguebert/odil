@@ -121,7 +121,7 @@ void
 StateMachine
 ::receive(EventData & data)
 {
-    this->_transport.receive(data.peer_endpoint);
+    this->_transport.receive(data.socket);
     this->transition(Event::TransportConnectionIndication, data);
 }
 

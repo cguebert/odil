@@ -95,7 +95,14 @@ Transport
         throw Exception("Already connected");
     }
 
-    auto source = Source::NONE;
+    this->_socket = std::make_shared<Socket>(this->_service);
+    boost::system::error_code error;
+    this->_socket->connect(peer_endpoint, error);
+
+    if(error)
+        throw SocketClosed("Connect error: " + error.message());
+
+/*    auto source = Source::NONE;
     boost::system::error_code error;
     this->_start_deadline(source, error);
 
@@ -109,50 +116,25 @@ Transport
         }
     );
 
-    this->_run(source, error);
+    this->_run(source, error);*/
 }
 
 void
 Transport
-::receive(Socket::endpoint_type const & endpoint)
+::receive(std::shared_ptr<Socket> socket)
 {
     if(this->is_open())
     {
         throw Exception("Already connected");
     }
 
-    auto source = Source::NONE;
-    boost::system::error_code error;
-    this->_start_deadline(source, error);
-
-    this->_socket = std::make_shared<Socket>(this->_service);
-    this->_acceptor = std::make_shared<boost::asio::ip::tcp::acceptor>(
-        this->_service, endpoint);
-    boost::asio::socket_base::reuse_address option(true);
-    this->_acceptor->set_option(option);
-    this->_acceptor->async_accept(
-        *this->_socket,
-        [&source,&error](boost::system::error_code const & e)
-        {
-            source = Source::OPERATION;
-            error = e;
-        }
-    );
-
-    this->_run(source, error);
-
-    this->_acceptor = nullptr;
+    this->_socket = std::move(socket);
 }
 
 void
 Transport
 ::close()
 {
-    if(this->_acceptor && this->_acceptor->is_open())
-    {
-        this->_acceptor->close();
-        this->_acceptor = nullptr;
-    }
     if(this->is_open())
     {
     //    this->_socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both);

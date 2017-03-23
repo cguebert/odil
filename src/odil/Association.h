@@ -146,6 +146,10 @@ public:
     /// @brief Request an association with the peer.
     void associate();
 
+    /// @brief Receive an association from a peer using an opened socket.
+    void receive_association(std::shared_ptr<dul::Transport::Socket> open_socket,
+        AssociationAcceptor acceptor=default_association_acceptor);
+
     /// @brief Receive an association from a peer.
     void receive_association(
         boost::asio::ip::tcp const & protocol, unsigned short port,

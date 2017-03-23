@@ -27,6 +27,7 @@ namespace dul
 class ODIL_API EventData
 {
 public:
+    std::shared_ptr<Transport::Socket> socket;
     Transport::Socket::endpoint_type peer_endpoint;
     std::shared_ptr<pdu::Object> pdu;
     AssociationParameters association_parameters;

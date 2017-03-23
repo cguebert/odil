@@ -262,11 +262,11 @@ Association
 void
 Association
 ::receive_association(
-    boost::asio::ip::tcp const & protocol, unsigned short port,
+    std::shared_ptr<dul::Transport::Socket> socket,
     AssociationAcceptor acceptor)
 {
     dul::EventData data;
-    data.peer_endpoint = dul::Transport::Socket::endpoint_type(protocol, port);
+    data.socket = std::move(socket);
 
     this->_state_machine.set_association_acceptor(acceptor);
 
@@ -323,6 +323,23 @@ Association
             this->_negotiated_parameters.as_a_associate_ac());
         this->_state_machine.send_pdu(data);
     }
+}
+
+void 
+Association
+::receive_association(
+    boost::asio::ip::tcp const & protocol, unsigned short port,
+    AssociationAcceptor acceptorFunc)
+{
+    auto& service = get_transport().get_service();
+    auto socket = std::make_shared<dul::Transport::Socket>(service);
+
+    dul::Transport::Socket::endpoint_type endpoint { protocol, port };
+    boost::asio::ip::tcp::acceptor acceptor { service, endpoint };
+    boost::system::error_code ec;
+    acceptor.accept(*socket, ec);
+
+    receive_association(socket, acceptorFunc);
 }
 
 void
