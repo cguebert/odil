@@ -279,7 +279,7 @@ Association
     if(data.pdu == NULL)
     {
         // We have rejected the request
-        if(!data.reject)
+        if(data.reject)
         {
             throw (*data.reject);
         }
