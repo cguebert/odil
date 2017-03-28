@@ -250,7 +250,10 @@ Association
         }
         else if(rejection != nullptr)
         {
-            throw Exception("Association rejected");
+            throw AssociationRejected(rejection->get_result(),
+                                      rejection->get_source(),
+                                      rejection->get_reason(),
+                                      "Association rejected");
         }
         else
         {
